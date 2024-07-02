@@ -2,7 +2,7 @@ class App {
   users = [];
   ads = [];
   reviews = [];
-  auth = []; //array
+  auth = [];
   reports = [];
   favorites = [];
 
