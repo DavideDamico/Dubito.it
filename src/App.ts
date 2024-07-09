@@ -7,7 +7,7 @@ import { ModelFavorite } from "./models/Favorite";
 import { ModelDevice } from "./models/Device";
 import { DocAPI } from "./models/DocAPI";
 
-class App {
+export class App {
   users: ReadonlyArray<ModelUser> = [];
   ads: ReadonlyArray<ModelAd> = [];
   reviews: ReadonlyArray<ModelReview> = [];
@@ -25,60 +25,42 @@ class App {
     else return authFound;
   }
 
-  login(
-    email: ModelUser["email"],
-    password: ModelUser["password"],
-    idDevice: ModelDevice["idDevice"]
-  ) {
+  login(username: ModelUser["username"], password: ModelUser["password"]) {
     const userFound = this.users.find(function (user) {
-      return user.email === email && user.password === password;
+      if (user.username === username && user.password === password) return true;
+      else return false;
     });
-
-    if (!userFound) {
-      console.log("Non-registered user or wrong password");
-      return null;
-    }
-
-    const authFound = this.auth.find(function (auth) {
-      return auth.referenceKeyUser === userFound.primaryKey;
-    });
-
-    if (authFound) {
-      console.log("Already logged in");
-      return null;
-    }
-
-    const validDevice = this.devices.find(function (device) {
-      return (
-        device.referenceKeyUser === userFound.primaryKey &&
-        device.idDevice === idDevice
-      );
-    });
-
-    if (!validDevice) {
-      const userDevices = this.devices.filter(function (device) {
-        return device.referenceKeyUser === userFound.primaryKey;
-      });
-
-      if (userDevices.length >= 2) {
-        console.log("Maximum number of devices reached");
-        return null;
-      }
-
-      const newDevice = new ModelDevice(userFound.primaryKey, idDevice);
-      this.devices = [...this.devices, newDevice];
-    } // controllo nell'array users l'email e la password, se li trova e non ha usato più di due device permette l'accesso, altrimenti mostra un messaggio di errore
-  }
-
-  logout(token: ModelAuth["token"]) {
-    const auth = this.getUserByToken(token);
-    if (!auth) {
-      console.log("Non-existent Token");
+    if (!!userFound) {
+      const auth = new ModelAuth(userFound.primaryKey);
+      this.auth = [...this.auth, auth];
+      console.log("Login Successful");
+      return auth.token;
     } else {
-      console.log("Logout successfully done");
+      console.log("User not found");
     }
+  }
+  // controllo nell'array users l'email e la password, se li trova permette l'accesso, altrimenti mostra un messaggio di errore
 
-    //controllare se l'account è loggato , se non è loggato console.log "Non-existent Token" sennò console.log "Logout successfully done"
+  logout(
+    referenceKeyUser: ModelAuth["referenceKeyUser"],
+    token: ModelAuth["token"]
+  ) {
+    const auth = this.getUserByToken(token);
+    if (!!auth) {
+      const userFound = this.auth.find(function (auth) {
+        if (auth.referenceKeyUser === referenceKeyUser) return true;
+        else return false;
+      });
+      if (!userFound) console.log("Non-existent Token");
+      else {
+        this.auth = this.auth.filter(function (user) {
+          if (userFound.referenceKeyUser === user.referenceKeyUser) return true;
+          else return false;
+        });
+        return true;
+      }
+    }
+    //controllare se l'account è loggato , se non è loggato console.log "Non-existent Token" se è loggato fargli fare il logout rimuovendo l'user dall'array di auth
   }
 
   register(
@@ -91,14 +73,42 @@ class App {
       else return false;
     });
     if (!!userFound) {
-      console.log("Account already exist");
+      return false;
     } else {
       const modelUser = new ModelUser(username, email, password);
       this.users = [...this.users, modelUser];
-      console.log("Account created");
+      return true;
     }
     // controllare se nell'array 'users' esiste già un oggetto con quell'username o email , se esiste già console.log "account already exist"
     // sennò richiamiamo il model e pushiamo il nuovo user nell'array con un console.log "registered successfully"
+  }
+
+  getUsersList() {
+    return this.users;
+  }
+
+  getReviewsList() {
+    return this.reviews;
+  }
+
+  getReportsList() {
+    return this.reports;
+  }
+
+  getFavoritesList() {
+    return this.favorites;
+  }
+
+  getDevicesList() {
+    return this.devices;
+  }
+
+  getAuthList() {
+    return this.auth;
+  }
+
+  getAdsList() {
+    return this.ads;
   }
 
   createAd(
@@ -128,7 +138,7 @@ class App {
         urlPhoto
       );
       this.ads = [...this.ads, newAd];
-      console.log("Ad successfully created");
+      return true;
     }
   }
 
@@ -402,6 +412,12 @@ class App {
   }
 
   detailAd(referenceKeyAd: ModelAd["primaryKey"]) {
+    const adFound = this.ads.find(function (ad) {
+      if (ad.primaryKey === referenceKeyAd) return true;
+      else return false;
+    });
+    if (!adFound) console.log("Ad not found");
+    else console.log(adFound);
     //cerca nell'array degli 'Ads' l'annuncio tramite la referenceKey
   }
 
