@@ -8,17 +8,17 @@ import { ModelDevice } from "./models/Device";
 import { DocAPI } from "./models/DocAPI";
 
 export class App {
-  users: ReadonlyArray<ModelUser> = [];
-  ads: ReadonlyArray<ModelAd> = [];
-  reviews: ReadonlyArray<ModelReview> = [];
-  auth: ReadonlyArray<ModelAuth> = [];
-  reports: ReadonlyArray<ModelReport> = [];
-  favorites: ReadonlyArray<ModelFavorite> = [];
-  devices: ReadonlyArray<ModelDevice> = [];
+  #users: ReadonlyArray<ModelUser> = [];
+  #ads: ReadonlyArray<ModelAd> = [];
+  #reviews: ReadonlyArray<ModelReview> = [];
+  #auths: ReadonlyArray<ModelAuth> = [];
+  #reports: ReadonlyArray<ModelReport> = [];
+  #favorites: ReadonlyArray<ModelFavorite> = [];
+  #devices: ReadonlyArray<ModelDevice> = [];
 
   getUserByToken(token: ModelAuth["token"]) {
-    const authFound = this.auth.find(function (auth) {
-      if (auth.token === token) return true;
+    const authFound = this.#auths.find(function (auths) {
+      if (auths.token === token) return true;
       else return false;
     });
     if (!authFound) return null;
@@ -26,49 +26,41 @@ export class App {
   }
 
   login(username: ModelUser["username"], password: ModelUser["password"]) {
-    const userFound = this.users.find(function (user) {
+    const userFound = this.#users.find(function (user) {
       if (user.username === username && user.password === password) return true;
       else return false;
     });
     if (!!userFound) {
       const auth = new ModelAuth(userFound.primaryKey);
-      this.auth = [...this.auth, auth];
+      this.#auths = [...this.#auths, auth];
       console.log("Login Successful");
       return auth.token;
     } else {
       console.log("User not found");
     }
   }
-  // controllo nell'array users l'email e la password, se li trova permette l'accesso, altrimenti mostra un messaggio di errore
+  // controllo nell'array #users l'email e la password, se li trova permette l'accesso, altrimenti mostra un messaggio di errore
 
-  logout(
-    referenceKeyUser: ModelAuth["referenceKeyUser"],
-    token: ModelAuth["token"]
-  ) {
+  logout(token: ModelAuth["token"]) {
     const auth = this.getUserByToken(token);
-    if (!!auth) {
-      const userFound = this.auth.find(function (auth) {
-        if (auth.referenceKeyUser === referenceKeyUser) return true;
+    if (!auth) console.log("Non-existent Token");
+    else {
+      this.#auths = this.#auths.filter(function (user) {
+        if (auth.token !== token) return true;
         else return false;
       });
-      if (!userFound) console.log("Non-existent Token");
-      else {
-        this.auth = this.auth.filter(function (user) {
-          if (userFound.referenceKeyUser === user.referenceKeyUser) return true;
-          else return false;
-        });
-        return true;
-      }
+      console.log("Logout Successful");
+      return true;
     }
-    //controllare se l'account è loggato , se non è loggato console.log "Non-existent Token" se è loggato fargli fare il logout rimuovendo l'user dall'array di auth
   }
+  //controllare se l'account è loggato , se non è loggato console.log "Non-existent Token" se è loggato fargli fare il logout rimuovendo l'user dall'array di auth
 
   register(
     username: ModelUser["username"],
     email: ModelUser["email"],
     password: ModelUser["password"]
   ) {
-    const userFound = this.users.find(function (emails) {
+    const userFound = this.#users.find(function (emails) {
       if (email === emails.email) return true;
       else return false;
     });
@@ -76,39 +68,39 @@ export class App {
       return false;
     } else {
       const modelUser = new ModelUser(username, email, password);
-      this.users = [...this.users, modelUser];
+      this.#users = [...this.#users, modelUser];
       return true;
     }
-    // controllare se nell'array 'users' esiste già un oggetto con quell'username o email , se esiste già console.log "account already exist"
+    // controllare se nell'array '#users' esiste già un oggetto con quell'username o email , se esiste già console.log "account already exist"
     // sennò richiamiamo il model e pushiamo il nuovo user nell'array con un console.log "registered successfully"
   }
 
   getUsersList() {
-    return this.users;
+    return this.#users;
   }
 
   getReviewsList() {
-    return this.reviews;
+    return this.#reviews;
   }
 
   getReportsList() {
-    return this.reports;
+    return this.#reports;
   }
 
   getFavoritesList() {
-    return this.favorites;
+    return this.#favorites;
   }
 
   getDevicesList() {
-    return this.devices;
+    return this.#devices;
   }
 
-  getAuthList() {
-    return this.auth;
+  getAuthsList() {
+    return this.#auths;
   }
 
   getAdsList() {
-    return this.ads;
+    return this.#ads;
   }
 
   createAd(
@@ -137,8 +129,8 @@ export class App {
         phone,
         urlPhoto
       );
-      this.ads = [...this.ads, newAd];
-      return true;
+      this.#ads = [...this.#ads, newAd];
+      return newAd;
     }
   }
 
@@ -156,39 +148,56 @@ export class App {
   ) {
     const auth = this.getUserByToken(token);
     if (!!auth) {
-      const adFound = this.ads.find(function (ad) {
-        if (ad.primaryKey === referenceKeyAd) return true;
-        else return false;
+      let editedAd;
+      this.#ads = this.#ads.map((ad) => {
+        if (ad.primaryKey == referenceKeyAd) {
+          editedAd = {
+            ...ad,
+            title: title,
+            description: description,
+            category: category,
+            status: status,
+            price: price,
+            address: address,
+            phone: phone,
+            urlPhoto: urlPhoto,
+          };
+          return {
+            ...ad,
+            title: title,
+            description: description,
+            category: category,
+            status: status,
+            price: price,
+            address: address,
+            phone: phone,
+            urlPhoto: urlPhoto,
+          };
+        } else {
+          return { ...ad };
+        }
       });
-      if (!!adFound) {
-        (adFound.title = title),
-          (adFound.description = description),
-          (adFound.category = category),
-          (adFound.status = status),
-          (adFound.price = price),
-          (adFound.address = address),
-          (adFound.phone = phone),
-          (adFound.urlPhoto = urlPhoto);
-      }
-      console.log("Ad successfully updated");
-    } else console.log("Authentication failed");
+      return editedAd;
+    } else {
+      return false;
+    }
   }
 
   deleteAd(token: ModelAuth["token"], referenceKeyAd: ModelAd["primaryKey"]) {
     const auth = this.getUserByToken(token);
     if (!auth) console.log("Non-existent Token");
     else {
-      const adFound = this.ads.find(function (ad) {
+      const adFound = this.#ads.find(function (ad) {
         if (ad.primaryKey === referenceKeyAd) return true;
         else return false;
       });
       if (!adFound) console.log("Non-existent Ad");
       else {
-        this.ads = this.ads.filter(function (ad) {
+        this.#ads = this.#ads.filter(function (ad) {
           if (adFound.primaryKey !== ad.primaryKey) return true;
           else return false;
         });
-        console.log("Ad deleted successfully");
+        return true;
       }
     }
     //controlla il token , trova l'annuncio tramite l'id ed elimina l'annuncio
@@ -202,11 +211,10 @@ export class App {
     rating: ModelReview["rating"]
   ) {
     const auth = this.getUserByToken(token);
-    const adFound = this.ads.find(function (ad) {
+    const adFound = this.#ads.find(function (ad) {
       if (ad.primaryKey === referenceKeyAd) return true;
       else return false;
     });
-
     if (!!auth) {
       if (!!adFound) {
         const newReview = new ModelReview(
@@ -216,10 +224,12 @@ export class App {
           description,
           rating
         );
-        this.reviews = [...this.reviews, newReview];
-        console.log("Review created");
-      } else console.log("Ad not found");
-    } else console.log("Authentication failed");
+        this.#reviews = [...this.#reviews, newReview];
+        return newReview;
+      }
+      return false;
+    }
+    return false;
     //controlla il token , targhetta l'annuncio, , verifica se si è autenticati , verifica se l'ad esiste , crea la review
   }
 
@@ -232,8 +242,8 @@ export class App {
   ) {
     const auth = this.getUserByToken(token);
     if (!!auth) {
-      const reviewFound = this.reviews.find(function (review) {
-        if (review.primaryKey === referenceKeyAd) return true;
+      const reviewFound = this.#reviews.find(function (review) {
+        if (review.referenceKeyAd === referenceKeyAd) return true;
         else return false;
       });
       if (!!reviewFound) {
@@ -241,6 +251,9 @@ export class App {
         reviewFound.description = description;
         reviewFound.rating = rating;
       }
+      return reviewFound;
+    } else {
+      return false;
     }
   }
 
@@ -251,7 +264,7 @@ export class App {
     const auth: any = this.getUserByToken(token);
     let reviewFound: any = null;
     if (!!auth) {
-      reviewFound = this.reviews.find(function (review) {
+      reviewFound = this.#reviews.find(function (review) {
         if (review.primaryKey === referenceKeyReview) return true;
         else return false;
       });
@@ -261,7 +274,7 @@ export class App {
       const isUserOwner =
         auth.referenceKeyUser === reviewFound.referenceKeyUser;
       if (isUserOwner) {
-        this.reviews = this.reviews.filter(function (review) {
+        this.#reviews = this.#reviews.filter(function (review) {
           if (review.primaryKey === referenceKeyReview) return false;
           else return true;
         });
@@ -270,29 +283,29 @@ export class App {
   }
 
   deleteAccount(token: ModelAuth["token"]) {
-    const authFound: any = this.auth.find(function (auth) {
+    const authFound: any = this.#auths.find(function (auth) {
       if (auth.token === token) return true;
       else return false;
     });
 
-    this.users = this.users.filter(function (user) {
+    this.#users = this.#users.filter(function (user) {
       if (authFound.referenceKeyUser === user.primaryKey) return false;
       else return true;
     });
   }
 
   updateUsername(username: ModelUser["username"], token: ModelAuth["token"]) {
-    const authFound: any = this.auth.find(function (auth) {
+    const authFound: any = this.#auths.find(function (auth) {
       if (auth.token === token) return true;
       else return false;
     });
 
-    const userFound: any = this.users.find(function (user) {
+    const userFound: any = this.#users.find(function (user) {
       if (authFound.referenceKeyUser === user.primaryKey) return true;
       else return false;
     });
 
-    this.users.map(function (user) {
+    this.#users.map(function (user) {
       if (user.primaryKey === userFound.primaryKeyUser)
         return { ...user, username: username };
       else return user;
@@ -306,7 +319,7 @@ export class App {
     description: ModelReport["description"]
   ) {
     const auth = this.getUserByToken(token);
-    const adFound = this.ads.find(function (ad) {
+    const adFound = this.#ads.find(function (ad) {
       if (ad.primaryKey === referenceKeyAd) return true;
       else return false;
     });
@@ -320,7 +333,7 @@ export class App {
           description,
           status
         );
-        this.reports = [...this.reports, newReport];
+        this.#reports = [...this.#reports, newReport];
       } else console.log("Ad not found");
     } else console.log("Authentication failed");
   }
@@ -332,14 +345,14 @@ export class App {
     const auth: any = this.getUserByToken(token);
     let reportFound: any = null;
     if (!!auth) {
-      reportFound = this.reports.find(function (report) {
+      reportFound = this.#reports.find(function (report) {
         if (report.primaryKey === referenceKeyReport) return true;
         else return false;
       });
     } else console.log("Authentication failed");
 
     if (!!reportFound) {
-      this.reports = this.reports.map(function (report) {
+      this.#reports = this.#reports.map(function (report) {
         if (reportFound.primaryKey === report.primaryKey)
           return {
             ...auth,
@@ -358,7 +371,7 @@ export class App {
     const authFound = this.getUserByToken(token);
     if (!authFound) console.log("Non-existent Token");
     else {
-      const adFound = this.ads.find(function (ad) {
+      const adFound = this.#ads.find(function (ad) {
         if (ad.primaryKey === referenceKeyAd) return true;
         else return false;
       });
@@ -367,7 +380,7 @@ export class App {
         if (authFound.referenceKeyUser !== adFound.referenceKeyUser) {
           console.log("Author not recognized");
         } else {
-          this.ads = this.ads.map(function (ad) {
+          this.#ads = this.#ads.map(function (ad) {
             if (adFound.primaryKey === ad.primaryKey) {
               return {
                 ...ad,
@@ -389,36 +402,36 @@ export class App {
   ) {
     const auth = this.getUserByToken(token);
     if (!!auth) {
-      const adFound = this.ads.find(function (ad) {
+      const adFound = this.#ads.find(function (ad) {
         if (ad.primaryKey === referenceKeyAd) return true;
         else return false;
       });
       if (!adFound) console.log("Ad not found");
       else {
-        this.ads = [...this.ads, adFound];
+        this.#ads = [...this.#ads, adFound];
       }
     } else console.log("Authentication failed");
   }
 
   getAdListByCategory(category: ModelAd["category"]) {
-    return this.ads.filter(function (ad) {
+    return this.#ads.filter(function (ad) {
       if (ad.category === category) return true;
       else return false;
-    }); // cerca nell'array ads la category, se la trova restituisce l'array filtrato, altrimenti restituisce un array vuoto
+    }); // cerca nell'array #ads la category, se la trova restituisce l'array filtrato, altrimenti restituisce un array vuoto
   }
 
   getAdListByTitle(text: ModelAd["title"]) {
-    //cerca nell'array degli 'Ads' il testo inserito all'interno di 'title' e
+    //cerca nell'array degli '#Ads' il testo inserito all'interno di 'title' e
   }
 
   detailAd(referenceKeyAd: ModelAd["primaryKey"]) {
-    const adFound = this.ads.find(function (ad) {
+    const adFound = this.#ads.find(function (ad) {
       if (ad.primaryKey === referenceKeyAd) return true;
       else return false;
     });
     if (!adFound) console.log("Ad not found");
     else console.log(adFound);
-    //cerca nell'array degli 'Ads' l'annuncio tramite la referenceKey
+    //cerca nell'array degli '#Ads' l'annuncio tramite la referenceKey
   }
 
   getAdListSoldByUser(
@@ -426,14 +439,14 @@ export class App {
     referenceKeyUser: ModelUser["primaryKey"]
   ) {
     const auth = this.getUserByToken(token);
-    return this.ads.filter(function (ad) {
+    return this.#ads.filter(function (ad) {
       if (
         ad.referenceKeyUser === referenceKeyUser &&
         ad.referenceKeyUserPurchased !== 0
       )
         return true;
       else return false;
-    }); // cerca nell'array ads gli id dell'user con lo status sold, se lo trova mostra un array filtrato, altrimenti restituisce un array vuoto
+    }); // cerca nell'array #ads gli id dell'user con lo status sold, se lo trova mostra un array filtrato, altrimenti restituisce un array vuoto
   }
 
   getAdListPurchasedByUser(
@@ -441,10 +454,10 @@ export class App {
     referenceKeyUser: ModelUser["primaryKey"]
   ) {
     const auth = this.getUserByToken(token);
-    return this.ads.filter(function (ad) {
+    return this.#ads.filter(function (ad) {
       if (ad.referenceKeyUserPurchased === referenceKeyUser) return true;
       else return false;
-    }); // cerca nell'array ads gli id dell'user con lo status sold, se lo trova mostra un array filtrato, altrimenti restituisce un array vuoto
+    }); // cerca nell'array #ads gli id dell'user con lo status sold, se lo trova mostra un array filtrato, altrimenti restituisce un array vuoto
   }
 
   listUserFavorites(
@@ -452,10 +465,10 @@ export class App {
     referenceKeyUser: ModelUser["primaryKey"]
   ) {
     const auth = this.getUserByToken(token);
-    return this.favorites.filter(function (favorite) {
+    return this.#favorites.filter(function (favorite) {
       if (favorite.referenceKeyUser === referenceKeyUser) return true;
       else return false;
-    }); // cerca nell'array favorites l'id, se lo trova restituisce l'array filtrato, altrimenti restituisce un array vuoto
+    }); // cerca nell'array #favorites l'id, se lo trova restituisce l'array filtrato, altrimenti restituisce un array vuoto
   }
 
   createFavorite(
@@ -466,7 +479,7 @@ export class App {
     const authFound = this.getUserByToken(token);
     if (!!authFound) {
       const newFavorite = new ModelFavorite(referenceKeyUser, referenceKeyAd);
-      this.favorites = [...this.favorites, newFavorite];
+      this.#favorites = [...this.#favorites, newFavorite];
     } else console.log("Token not valid");
   }
 
@@ -483,13 +496,13 @@ export class App {
   ) {
     const authFound = this.getUserByToken(token);
     if (!!authFound) {
-      const favFound = this.favorites.find(function (favorite) {
+      const favFound = this.#favorites.find(function (favorite) {
         if (favorite.primaryKey === referenceKeyFavorite) return true;
         else return false;
       });
       if (!favFound) console.log("Ad not found");
       else {
-        this.favorites = this.favorites.filter(function (favorites: {
+        this.#favorites = this.#favorites.filter(function (favorites: {
           primaryKey: any;
         }) {
           if (favFound.primaryKey === favorites.primaryKey) return true;
@@ -513,14 +526,14 @@ export class App {
 
   registerDevice(token: ModelAuth["token"], idDevice: ModelDevice["idDevice"]) {
     const auth: any = this.getUserByToken(token);
-    const userDevices = this.devices.filter(function (device) {
+    const userDevices = this.#devices.filter(function (device) {
       if (device.referenceKeyUser === auth.referenceKeyUser) return true;
       else return false;
     });
     if (!!auth) {
       if (userDevices.length < 2) {
         const newDevice = new ModelDevice(auth.referenceKeyUser, idDevice);
-        this.devices = [...this.devices, newDevice];
+        this.#devices = [...this.#devices, newDevice];
       } else console.log("Maximum number of devices reached");
     } else console.log("Authentication failed");
   }
@@ -531,7 +544,7 @@ export class App {
     idDevice: ModelDevice["idDevice"]
   ) {
     const auth: any = this.getUserByToken(token);
-    const device: any = this.devices.find(function (device) {
+    const device: any = this.#devices.find(function (device) {
       if (
         device.referenceKeyUser === auth.referenceKeyUser &&
         device.idDevice === idDevice
@@ -544,7 +557,7 @@ export class App {
         device.referenceKeyUser === auth.referenceKeyUser &&
         device.idDevice === idDevice
       ) {
-        this.devices = this.devices.map(function (device) {
+        this.#devices = this.#devices.map(function (device) {
           if (
             device.referenceKeyUser === auth.referenceKeyUser &&
             device.idDevice === idDevice
@@ -559,7 +572,7 @@ export class App {
   deleteDevice(token: ModelAuth["token"], idDevice: ModelDevice["idDevice"]) {
     const auth = this.getUserByToken(token);
     if (!!auth) {
-      this.devices = this.devices.filter(function (device) {
+      this.#devices = this.#devices.filter(function (device) {
         if (
           device.referenceKeyUser === auth.referenceKeyUser &&
           device.idDevice === idDevice
@@ -577,20 +590,18 @@ const apis = {
   register: new DocAPI("/auth/register", "POST", false),
   login: new DocAPI("/auth/login", "POST", false),
   logout: new DocAPI("/auth/logout", "GET", true),
+  getUsersList: new DocAPI("/users", "GET", true),
+  getReviewsList: new DocAPI("/reviews", "GET", true),
+  getReportsList: new DocAPI("/reports", "GET", true),
+  getFavoritesList: new DocAPI("/favorites", "GET", true),
+  getDevicesList: new DocAPI("/devices", "GET", true),
+  getAuthsList: new DocAPI("/auths", "GET", true),
   createAd: new DocAPI("/ads", "POST", true),
   updateAd: new DocAPI("/ads/{primaryKey}", "PUT", true),
   deleteAd: new DocAPI("/ads/{primaryKey}", "DELETE", true),
-  createReview: new DocAPI("/ads/{primaryKey}/reviews", "POST", true),
-  updateReview: new DocAPI(
-    "/ads/{primaryKey}/reviews/{primaryKey}",
-    "PUT",
-    true
-  ),
-  deleteReview: new DocAPI(
-    "/ads/{primaryKey}/reviews/{primaryKey}",
-    "DELETE",
-    true
-  ),
+  createReview: new DocAPI("/ads/{primaryKey}", "POST", true),
+  updateReview: new DocAPI("reviews/{primaryKey}", "PUT", true),
+  deleteReview: new DocAPI("reviews/{primaryKey}", "DELETE", true),
   deleteAccount: new DocAPI("/users/{primaryKey}", "DELETE", true),
   updateUsername: new DocAPI("/users/{primaryKey}", "PATCH", true),
   createReport: new DocAPI("/reports", "POST", true),

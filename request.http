@@ -1,4 +1,4 @@
-### sign up
+### register
 POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
@@ -14,5 +14,100 @@ Content-Type: application/json
 
 {
     "username": "davide22",
-    "password": "1234",
+    "password": "1234"
 }
+
+### logout 
+GET http://localhost:3000/api/auth/logout
+Content-Type: application/json
+Authorization: 0.7453686406149913
+
+### users
+GET http://localhost:3000/api/users
+Content-Type: application/json
+
+### reviews
+GET http://localhost:3000/api/reviews
+Content-Type: application/json
+
+### reports
+GET http://localhost:3000/api/reports
+Content-Type: application/json
+
+### favorites
+GET http://localhost:3000/api/favorites
+Content-Type: application/json
+
+### devices
+GET http://localhost:3000/api/devices
+Content-Type: application/json
+
+### auths
+GET http://localhost:3000/api/autsh
+Content-Type: application/json
+
+### ads
+GET http://localhost:3000/api/ads
+Content-Type: application/json
+
+### createAd
+POST http://localhost:3000/api/ads
+Content-Type: application/json
+Authorization: 0.7453686406149913
+
+{
+    "title": "iphone 13",
+    "description": "fantastico",
+    "category": "elettronica",
+    "status": "come nuovo",
+    "price": 150,
+    "address": "via le mani dal culo",
+    "phone": "333999333",
+    "urlPhoto": "url"
+}
+
+### updateAd
+PUT http://localhost:3000/api/ads/0.5639785400370363
+Content-Type: application/json
+Authorization: 0.7453686406149913
+
+{
+    "title": "iphone 10",
+    "primaryKey": "0.5639785400370363",
+    "description": "fantasticoooo",
+    "category": "elettronicaaaaa",
+    "status": "come nuovooooo",
+    "price": 69,
+    "address": "via le mani dal culoooo",
+    "phone": "3339993333333",
+    "urlPhoto": "urlllll"
+}
+
+### deleteAd
+DELETE http://localhost:3000/api/ads/0.5639785400370363
+Content-Type: application/json
+Authorization: 0.7453686406149913
+
+### createReview
+POST http://localhost:3000/api/reviews/0.5639785400370363
+Content-Type: application/json
+Authorization: 0.7453686406149913
+
+{
+    "title": "Iphone incredibile",
+    "description": "fantasticoooo",
+    "rating": 5
+}
+
+### updateReview
+PUT http://localhost:3000/api/reviews/0.5639785400370363
+Content-Type: application/json
+Authorization: 0.7453686406149913
+
+{
+    "title": "Iphone sporco di merda",
+    "description": "Che merda",
+    "rating": "10"
+}
+
+
