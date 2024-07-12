@@ -1,5 +1,5 @@
 ### register
-POST http://localhost:3000/api/auth/register
+POST https://dubitoit-production-3acf.up.railway.app/api/auth/register
 Content-Type: application/json
 
 {
@@ -107,7 +107,7 @@ Authorization: 0.7453686406149913
 {
     "title": "Iphone sporco di merda",
     "description": "Che merda",
-    "rating": "10"
+    "rating": 10
 }
 
 

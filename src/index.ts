@@ -1,10 +1,14 @@
 import express, { Request, Response } from "express";
 import { App } from "./App";
+import { swaggerUi, swaggerSpec } from "./swagger";
 
 const app = express();
 const server = express.json();
 const myApp = new App();
+const port = process.env.PORT || 3000;
+const baseURL = process.env.BASE_URL || "http://localhost:";
 
+app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(server);
 
 app.get("/api/users", function (req: Request, res: Response) {
@@ -202,6 +206,6 @@ app.put("/api/reviews/:referenceKeyAd", function (req: Request, res: Response) {
   else return res.status(400).json({ message: "Authentication failed" });
 });
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+app.listen(port, () => {
+  console.log(`Server is running on ${baseURL}${port}`);
 });

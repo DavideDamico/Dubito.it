@@ -1,0 +1,338 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  version: 1.0.0
+  tags:
+    - name: Auth
+      description: Authentication and authorization
+    - name: Users
+      description: Manage users
+    - name: Reviews
+      description: Manage reviews
+    - name: Reports
+      description: Manage reports
+    - name: Favorites
+      description: Manage favorites
+    - name: Devices
+      description: Manage devices
+    - name: Ads
+      description: Manage ads
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: User registered successfully
+        "400":
+          description: Missing required fields or user already exists
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: User logged in successfully
+        "400":
+          description: Missing required fields or invalid credentials
+
+  /api/auth/logout:
+    get:
+      tags:
+        - Auth
+      summary: Logout a user
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Logout successfully
+        "400":
+          description: Non-existent token
+
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: Retrieve a list of users
+      responses:
+        "200":
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /api/reviews:
+    get:
+      tags:
+        - Reviews
+      summary: Retrieve a list of reviews
+      responses:
+        "200":
+          description: A list of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /api/reports:
+    get:
+      tags:
+        - Reports
+      summary: Retrieve a list of reports
+      responses:
+        "200":
+          description: A list of reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /api/favorites:
+    get:
+      tags:
+        - Favorites
+      summary: Retrieve a list of favorites
+      responses:
+        "200":
+          description: A list of favorites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /api/devices:
+    get:
+      tags:
+        - Devices
+      summary: Retrieve a list of devices
+      responses:
+        "200":
+          description: A list of devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /api/auths:
+    get:
+      tags:
+        - Auth
+      summary: Retrieve a list of auths
+      responses:
+        "200":
+          description: A list of auths
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /api/ads:
+    get:
+      tags:
+        - Ads
+      summary: Retrieve a list of ads
+      responses:
+        "200":
+          description: A list of ads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+    post:
+      tags:
+        - Ads
+      summary: Create a new ad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                status:
+                  type: string
+                price:
+                  type: number
+                address:
+                  type: string
+                phone:
+                  type: string
+                urlPhoto:
+                  type: string
+      responses:
+        "200":
+          description: Ad created successfully
+        "400":
+          description: Missing required fields or authentication failed
+
+    put:
+      tags:
+        - Ads
+      summary: Update an ad
+      parameters:
+        - in: path
+          name: primaryKey
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                primaryKey:
+                  type: integer
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                status:
+                  type: string
+                price:
+                  type: number
+                address:
+                  type: string
+                phone:
+                  type: string
+                urlPhoto:
+                  type: string
+      responses:
+        "200":
+          description: Ad updated successfully
+        "400":
+          description: Missing required fields or authentication failed
+
+    delete:
+      tags:
+        - Ads
+      summary: Delete an ad
+      parameters:
+        - in: path
+          name: primaryKey
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ad deleted successfully
+        "400":
+          description: Authentication failed
+
+  /api/reviews/{referenceKeyAd}:
+    post:
+      tags:
+        - Reviews
+      summary: Create a new review
+      parameters:
+        - in: path
+          name: referenceKeyAd
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                rating:
+                  type: number
+      responses:
+        "200":
+          description: Review created successfully
+        "400":
+          description: Missing required fields or authentication failed
+
+    put:
+      tags:
+        - Reviews
+      summary: Update a review
+      parameters:
+        - in: path
+          name: referenceKeyAd
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                rating:
+                  type: number
+      responses:
+        "200":
+          description: Review updated successfully
+        "400":
+          description: Missing required fields or authentication failed
